@@ -1,0 +1,953 @@
+@use "../helpers/" as *;
+
+/* ==========================================================================
+   1. ОБЩИЕ СТИЛИ И СБРОСЫ
+   ========================================================================== */
+:root {
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --success: #10b981;
+  --success-bg: #ecfdf5;
+  --danger: #ef4444;
+  --danger-bg: #fef2f2;
+  --warning: #f97316;
+  --warning-bg: #fff7ed;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border: #cbd5e1;
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+body {
+  background-color: #f1f5f9;
+  color: var(--text-main);
+  padding: 16px;
+  line-height: 1.5;
+}
+
+/* Контейнер всего приложения */
+.market-report {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   2. ШАПКА ПРИЛОЖЕНИЯ
+   ========================================================================== */
+.market-report__header {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: white;
+  padding: 20px;
+}
+
+.market-report__header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.market-report__main-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.market-report__date {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.market-report__btn-reset {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.market-report__btn-reset:hover {
+  background: rgba(239, 68, 68, 0.4);
+  color: white;
+}
+
+/* ==========================================================================
+   3. НАВИГАЦИЯ И ВКЛАДКИ (ТАБЫ) — АДАПТИВНАЯ СЕТКА
+   ========================================================================== */
+.market-report__tabs-container {
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border);
+  padding: 12px;
+}
+
+.market-report__tabs {
+  display: grid;
+  /* По умолчанию на мобильных: две колонки одинакового размера */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.market-report__tab-btn {
+  background: #e2e8f0;
+  border: 1px solid transparent;
+  padding: 12px 8px;
+  /* Закругляем со всех сторон, так как это теперь карточки */
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+/* Стиль для активной карточки-таба */
+.market-report__tab-btn--active {
+  background: var(--bg-card);
+  border-color: var(--border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Кнопка добавления новой точки тоже красиво встает в сетку */
+.market-report__btn-tab-add {
+  background: transparent;
+  border: 2px dashed #10b981;
+  color: #10b981;
+  padding: 10px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* На больших экранах (компьютерах) возвращаем их в один ряд, чтобы не занимать место */
+@media (min-width: 640px) {
+  .market-report__tabs {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .market-report__tab-btn,
+  .market-report__btn-tab-add {
+    flex: unset;
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0; /* на ПК оставляем только верхние углы */
+  }
+}
+
+/* Контентная часть */
+.market-report__content {
+  padding: 20px;
+}
+
+/* ==========================================================================
+   4. КАРТОЧКА ПРОДАВЦА И СТРОКА ТОВАРА
+   ========================================================================== */
+.seller-report__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.seller-report__title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.seller-report__badge {
+  font-size: 11px;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+.seller-report__btn-delete-seller {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Строка конкретного товара */
+.product-row {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.product-row__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-bottom: 1px dashed #f1f5f9;
+  padding-bottom: 10px;
+}
+
+.product-row__name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.product-row__actions-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-row__prices-display {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.product-row__margin-badge {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Кнопки переключения Уценки и Брака */
+.product-row__toggles {
+  display: flex;
+  gap: 6px;
+}
+
+.product-row__btn-toggle {
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.product-row__btn-toggle--discount {
+  color: var(--danger);
+  border-color: #fca5a5;
+}
+.product-row__btn-toggle--discount.active {
+  background-color: var(--danger-bg);
+  border-color: var(--danger);
+}
+
+.product-row__btn-toggle--waste {
+  color: var(--warning);
+  border-color: #fed7aa;
+}
+.product-row__btn-toggle--waste.active {
+  background-color: var(--warning-bg);
+  border-color: var(--warning);
+}
+
+.product-row__btn-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+}
+
+/* ==========================================================================
+   5. АДАПТИВНАЯ GRID СЕТКА ПОЛЕЙ ВВОДА
+   ========================================================================== */
+.product-row__inputs {
+  display: grid;
+  /* На ПК распределяются адаптивно, занимая не менее 110px каждое */
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+  width: 100%;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-field__label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.form-field__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px; /* Защита от автозума в iOS */
+  font-weight: 600;
+  color: var(--text-main);
+  background-color: var(--bg-main);
+  transition: all 0.15s;
+}
+
+.form-field__input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Выделение цветом полей уценки */
+.form-field--discount .text-red {
+  color: var(--danger);
+}
+.form-field .border-red {
+  border-color: #fca5a5;
+  background-color: #fffbfa;
+}
+.form-field .border-red:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* Выделение цветом полей брака */
+.form-field--waste .text-orange {
+  color: #ea580c;
+}
+.form-field .border-orange {
+  border-color: #fed7aa;
+  background-color: #fffbf7;
+}
+.form-field .border-orange:focus {
+  border-color: var(--warning);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+/* Элементы статистики под инпутами */
+.product-row__stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.product-row__stat-item--profit {
+  color: var(--success);
+}
+
+.text-orange {
+  color: var(--warning);
+}
+.font-bold {
+  font-weight: 700;
+}
+.text-muted {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+/* Форма быстрого редактирования параметров товара прямо в строке */
+.product-row__edit-form {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+.product-row__edit-input {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  width: 80px;
+  
+  @include mobile-s {
+    width: 60px;
+  }
+}
+.product-row__edit-input--name {
+  flex: 2;
+  width: auto;
+
+  @include mobile-s {
+    width: 90px;
+  }
+}
+.product-row__btn-confirm {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* ==========================================================================
+   6. ДОБАВЛЕНИЕ ТОВАРОВ И РАСХОДОВ К КАРТОЧКЕ
+   ========================================================================= */
+.seller-report__add-section {
+  margin: 20px 0;
+}
+
+.seller-report__btn-add {
+  width: 100%;
+  background: #f0fdf4;
+  border: 1px dashed var(--success);
+  color: #15803d;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.add-product-form {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.add-product-form__row {
+  display: flex;
+  gap: 10px;
+}
+
+.add-product-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+}
+.btn--save {
+  background: var(--primary);
+  color: white;
+}
+.btn--cancel {
+  background: #e2e8f0;
+  color: #475569;
+}
+.btn--sm {
+  padding: 6px 12px;
+}
+
+/* Расходы */
+.seller-report__expenses-section {
+  background: #fdf2f2;
+  border: 1px solid #fee2e2;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.seller-report__expenses-title {
+  font-size: 14px;
+  color: #991b1b;
+  margin-bottom: 10px;
+}
+
+.seller-report__expenses-list {
+  margin-bottom: 12px;
+}
+
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  border: 1px solid #fecaca;
+}
+
+.expense-item__amount {
+  color: var(--danger);
+  font-weight: 700;
+}
+.expense-item__btn-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.add-expense-form {
+  display: flex;
+  gap: 8px;
+}
+.form-field__input--sm {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+/* Итоговые плашки по точке */
+.seller-report__total {
+  background: #f1f5f9;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.seller-report__total-breakdown {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.total-breakdown__row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.total-breakdown__row--expense {
+  color: var(--danger);
+}
+
+.seller-report__total-results {
+  display: flex;
+  gap: 12px;
+}
+
+.total-result-block {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.total-result-block--revenue {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.total-result-block--profit {
+  background: var(--success-bg);
+  color: #047857;
+}
+
+.total-result-block__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.total-result-block__value {
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   7. СТИЛИ СТРАНИЦЫ ОБЩЕЙ СВОДКИ (ТАБЛИЦА СРАВНЕНИЯ)
+   ========================================================================== */
+.summary-page__title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+.summary-page__sub-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 24px 0 12px 0;
+}
+
+.summary-page__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.summary-card {
+  padding: 16px;
+  border-radius: 12px;
+  color: white;
+}
+
+.summary-card--revenue {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+.summary-card--expenses {
+  background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+}
+.summary-card--profit {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+
+.summary-card__label {
+  font-size: 12px;
+  opacity: 0.85;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.summary-card__value {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 4px 0;
+  display: block;
+}
+.summary-card__sub {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+/* Таблица */
+.summary-page__table-wrapper {
+  overflow-x: auto;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: white;
+}
+
+.summary-table th {
+  background: #f8fafc;
+  padding: 12px 16px;
+  font-weight: 700;
+  color: #475569;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.summary-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.summary-table__row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.summary-table__row:hover {
+  background: #f8fafc;
+}
+
+.summary-table__cell-name {
+  font-weight: 600;
+  color: var(--primary);
+}
+.text-right {
+  text-align: right;
+}
+.text-red {
+  color: var(--danger);
+}
+.text-blue {
+  color: var(--primary);
+}
+.text-green {
+  color: var(--success);
+}
+
+/* Модальное окно */
+.market-report__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+.add-seller-form {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ==========================================================================
+   8. МОБИЛЬНАЯ АДАПТАЦИЯ (МЕДИА-ЗАПРОСЫ)
+   ========================================================================== */
+@media (max-width: 580px) {
+  body {
+    padding: 8px;
+  }
+
+  .market-report__content {
+    padding: 12px;
+  }
+
+  .market-report__main-title {
+    font-size: 20px;
+  }
+
+  /* ЖЕСТКАЯ ДВУХКОЛОНОЧНАЯ МОБИЛЬНАЯ СЕТКА */
+  .product-row__inputs {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  /* Уценка и брак автоматически уходят на нижние строки, не сжимая Утро/Вечер */
+  .form-field--discount {
+    grid-row: 2;
+  }
+  .form-field--waste {
+    grid-row: 3;
+  }
+
+  /* Перенос контента в шапке товара */
+  .product-row__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .product-row__actions-zone {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .product-row__toggles {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .product-row__btn-toggle {
+    flex: 1;
+    text-align: center;
+    padding: 8px; /* Кнопки крупнее под пальцы */
+    font-size: 12px;
+  }
+
+  .seller-report__total-results {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* Выравнивание левой части блока статистики (Продано и Остаток) */
+.product-row__stats-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Цвет и стиль для плашки остатка */
+.product-row__stat-item--balance {
+  color: #475569;
+}
+
+.product-row__stat-item--balance strong {
+  color: #0f172a;
+}
+
+/* Адаптивность для блока статистики на мобильном экране */
+@media (max-width: 400px) {
+  .product-row__stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .product-row__stat-item--profit {
+    align-self: flex-end;
+    font-size: 14px;
+  }
+}
+
+/* Детализированная панель статистики */
+.product-row__stats-detailed {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Поток информационных элементов */
+.stats-detailed__info-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px 16px; /* Отступы между блоками текста */
+  font-size: 13px;
+  color: #334155;
+}
+
+/* Стили для разных типов данных */
+.stats-detailed__item {
+  font-weight: 500;
+}
+.stats-detailed__item strong {
+  font-weight: 700;
+}
+
+/* Цветовое кодирование текста */
+.text-green-dark {
+  color: #166534;
+} /* Темно-зеленый для хорошего товара */
+.text-red-dark {
+  color: #991b1b;
+} /* Темно-красный для уценки */
+.text-orange-dark {
+  color: #c2410c;
+} /* Темно-оранжевый для мусора */
+.text-blue-dark {
+  color: #1e40af;
+} /* Темно-синий для остатка */
+
+/* Зона прибыли справа */
+.stats-detailed__profit-zone {
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+}
+.text-success-bold {
+  color: #10b981;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* Адаптация под мелкие экраны мобильных */
+@media (max-width: 640px) {
+  .product-row__stats-detailed {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 12px;
+  }
+
+  .stats-detailed__info-flow {
+    flex-direction: column; /* На телефонах выстраиваем списком сверху вниз */
+    gap: 6px;
+    width: 100%;
+  }
+
+  .stats-detailed__profit-zone {
+    width: 100%;
+    text-align: right;
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+}
+
+/* ==========================================================================
+   ВНУТРЕННИЕ ТАБЫ ДЛЯ ОДНОЙ ТОРГОВОЙ ТОЧКИ
+   ========================================================================== */
+.inner-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Три равные колонки */
+  gap: 6px;
+  margin: 12px 0 20px 0;
+  padding: 0 4px;
+
+  @include mobile-s {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.inner-tab-btn {
+  min-width: 120px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 10px 15px;
+  height: auto;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 10px 4px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.inner-tab-btn:hover {
+  color: var(--text-main);
+}
+
+/* Активный внутренний таб */
+.inner-tab-btn--active {
+  background: #1e293b;
+  border-color: #1e293b;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(30, 41, 59, 0.15);
+}
+
+.inner-tab-content {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.product-tabs {
+  @include mobile-s {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
